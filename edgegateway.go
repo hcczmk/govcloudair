@@ -189,7 +189,7 @@ func (e *EdgeGateway) RemoveNATMapping(nattype, externalIP, internalIP, port str
 
 }
 
-func (e *EdgeGateway) AddNATMapping(nattype, externalIP, internalIP, port string) (Task, error) {
+func (e *EdgeGateway) AddNATMapping(nattype, externalIP, internalIP, orgport string, traport string) (Task, error) {
 	// Find uplink interface
 	var uplink types.Reference
 	for _, gi := range e.EdgeGateway.Configuration.GatewayInterfaces.GatewayInterface {
@@ -218,7 +218,8 @@ func (e *EdgeGateway) AddNATMapping(nattype, externalIP, internalIP, port string
 			// If matches, let's skip it and continue the loop
 			if v.RuleType == nattype &&
 				v.GatewayNatRule.OriginalIP == externalIP &&
-				v.GatewayNatRule.OriginalPort == port &&
+				v.GatewayNatRule.OriginalPort == orgport &&
+				v.GatewayNatRule.TranslatedPort == traport &&
 				v.GatewayNatRule.TranslatedIP == internalIP &&
 				v.GatewayNatRule.Interface.HREF == uplink.HREF {
 				continue
@@ -237,9 +238,9 @@ func (e *EdgeGateway) AddNATMapping(nattype, externalIP, internalIP, port string
 				HREF: uplink.HREF,
 			},
 			OriginalIP:     externalIP,
-			OriginalPort:   port,
+			OriginalPort:   orgport,
 			TranslatedIP:   internalIP,
-			TranslatedPort: port,
+			TranslatedPort: traport,
 			Protocol:       "tcp",
 		},
 	}
